@@ -25,9 +25,11 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.kotlin.stdlib)
+    compileOnly(libs.bundles.kotlin)
+    compileOnly(libs.bundles.kotlinx)
     compileOnly(libs.bundles.kyori) // Needed to use the newest version of kyori in Minix
-    compileOnly("dev.racci:Minix:1.2.2")
+    compileOnly(libs.koin.core)
+    compileOnly(libs.minecraft.minix)
 }
 
 tasks.shadowJar {
