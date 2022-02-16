@@ -1,10 +1,34 @@
-pre_bump_hooks = []
-post_bump_hooks = []
+pre_bump_hooks = [
+    """
+        bash -c "if ! ./gradlew test --info; then exit 1; fi"
+    """,
+    "echo 'Bumping from v{{latest}} to v{{version}}!'",
+]
+post_bump_hooks = [
+    # Update the version in gradle properties and amend last commit
+    "sed -i 's/version=.*/version={{version}}/' ./gradle.properties",
+    "git add ./gradle.properties",
+    "git commit --amend -C HEAD",
+    # Push to github with new tag
+    "git push",
+    "git push origin v{{version}}",
+    # Build gradle
+    "./gradlew clean build -Pversion=\"{{version}}\"",
+    # Create changelog and make new release
+    "bash -c \"cog changelog -a v{{version}} -t default >> ./.templog.md\"",
+    "gh release create \"v{{version}}\" -F ./.templog.md -t 'Example release {{version}}' build/libs/*.jar",
+    "rm ./.templog.md",
+    # Update tags
+    "git fetch --tags origin",
+]
 
-[commit_types]
+tag_prefix = "v"
 
 [changelog]
 path = "CHANGELOG.md"
+template = "remote"
+remote = "github.com"
+repository = "Minix" # Your github repo
+owner = "Example" # Your github username
 authors = []
 
-[bump_profiles]
